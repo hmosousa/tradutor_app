@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tradutor</title>
+    <style>
+        /* Basic styling */
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        textarea { width: 100%; height: 100px; }
+        button { padding: 10px 20px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tradutor</h1>
+        <textarea id="inputText" placeholder="Enter text to translate..."></textarea>
+        <button onclick="translateText()">Translate</button>
+        <br>
+        <br>
+        <div id="outputText"></div>
+    </div>
+    <script>
+        function translateText() {
+            const inputText = document.getElementById('inputText').value;
+            fetch('/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: inputText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('outputText').innerText = data.translated_text;
+            });
+        }
+    </script>
+</body>
+</html>
