@@ -1,13 +1,20 @@
+import os
+
 import torch
 from flask import Flask, jsonify, render_template, request
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from dotenv import load_dotenv
+
+load_dotenv()
+HF_TOKEN = os.getenv("HF_TOKEN")
+
 
 app = Flask(__name__)
 
 
-TOKENIZER = AutoTokenizer.from_pretrained("hmosousa/temp")
+TOKENIZER = AutoTokenizer.from_pretrained("hugosousa/temp", token=HF_TOKEN)
 MODEL = AutoModelForCausalLM.from_pretrained(
-    "hmosousa/temp", device_map="cuda", torch_dtype=torch.bfloat16
+    "hugosousa/temp", device_map="cuda", torch_dtype=torch.bfloat16, token=HF_TOKEN
 )
 
 
@@ -29,8 +36,6 @@ def translate_text(text):
         tokenize=True,
         return_tensors="pt",
         max_length=1024,
-        truncation=True,
-        padding=True,
     ).to(MODEL.device)
 
     output_ids = MODEL.generate(
@@ -40,7 +45,8 @@ def translate_text(text):
         pad_token_id=TOKENIZER.eos_token_id,
     )
 
-    generated_ids = output_ids[:, input_ids.shape[1] :]
+    generated_ids = output_ids[0, input_ids.shape[1] :]
+    print(generated_ids.shape)
     return TOKENIZER.decode(generated_ids, skip_special_tokens=True)
 
 
